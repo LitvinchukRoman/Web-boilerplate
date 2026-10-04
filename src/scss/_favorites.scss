@@ -1,0 +1,65 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.carousel {
+  position: relative;
+
+  &__arrow {
+    position: absolute;
+    top: 96px;
+    width: 20px;
+    height: 64px;
+    padding: 0;
+    border: 0;
+    background: $c-arrow;
+    clip-path: polygon(100% 0, 100% 27%, 45% 50%, 100% 73%, 100% 100%, 0 50%);
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover,
+    &:focus-visible {
+      background: $c-text;
+    }
+
+    &--prev {
+      left: -60px;
+    }
+
+    &--next {
+      right: -60px;
+      transform: scaleX(-1);
+    }
+  }
+
+  @include mobile {
+    &__arrow {
+      display: none;
+    }
+  }
+}
+
+.cards--carousel {
+  margin-top: 34px;
+
+  @include mobile {
+    grid-template-columns: none;
+    grid-auto-columns: 160px;
+    grid-auto-flow: column;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+
+    .card {
+      scroll-snap-align: start;
+    }
+  }
+}
+
+.footer {
+  &__text {
+    margin-top: 44px;
+
+    p + p {
+      margin-top: 16px;
+    }
+  }
+}

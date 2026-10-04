@@ -1,0 +1,103 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.table-wrap {
+  margin-top: 34px;
+
+  @include mobile {
+    overflow-x: auto;
+  }
+}
+
+.stats {
+  width: 100%;
+  border-collapse: collapse;
+
+  &__col {
+    &--name {
+      width: 230px;
+    }
+
+    &--speciality {
+      width: 232px;
+    }
+
+    &--age {
+      width: 136px;
+    }
+
+    &--gender {
+      width: 178px;
+    }
+  }
+
+  th {
+    height: 49px;
+    border-bottom: 1px solid $c-text;
+    font-size: 20px;
+    font-weight: 400;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+
+    &:first-child {
+      padding-left: 32px;
+      text-align: left;
+    }
+
+    &:hover {
+      background: #fafafa;
+      box-shadow: inset 0 -4px 0 $c-text;
+
+      // absolute без координат лишає стрілку на місці, але не зсуває центрований текст
+      &::after {
+        content: '↓';
+        position: absolute;
+        margin-left: 15px;
+        color: $c-sort;
+      }
+    }
+  }
+
+  td {
+    height: 36px;
+    padding: 4px 0 0;
+    text-align: center;
+
+    &:first-child {
+      padding-left: 20px;
+      text-align: left;
+    }
+  }
+
+  tbody tr:nth-child(even) {
+    background: $c-row-alt;
+  }
+
+  @include mobile {
+    min-width: 640px;
+  }
+}
+
+.pagination {
+  display: flex;
+  gap: 20px;
+  margin-top: 34px;
+  padding-left: 20px;
+
+  &__item {
+    color: $c-link;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $c-accent;
+    }
+
+    &--current,
+    &--dots,
+    &--current:hover,
+    &--dots:hover {
+      color: $c-text;
+    }
+  }
+}

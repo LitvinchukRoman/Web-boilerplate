@@ -1,0 +1,276 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.popup {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+
+  &:target {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+  }
+
+  &__window {
+    position: relative;
+    width: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    background: #fff;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.45);
+
+    &--add {
+      max-width: 560px;
+    }
+
+    &--info {
+      max-width: 948px;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 63px;
+    padding: 0 24px 0 20px;
+    background: $c-popup-head;
+    color: #fff;
+  }
+
+  &__window--info &__header {
+    height: 64px;
+  }
+
+  &__title {
+    margin-top: -4px;
+    font: 400 28px/1 $font-title;
+  }
+
+  &__close {
+    position: relative;
+    width: 17px;
+    height: 17px;
+    margin-top: -2px;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 22px;
+      height: 4px;
+      border-radius: 1px;
+      background: #fff;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    &::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    &:hover::before,
+    &:hover::after {
+      background: $c-accent;
+    }
+  }
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 21px 32px;
+  padding: 32px 36px 29px;
+  color: $c-label;
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__control {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid $c-control;
+    border-radius: 2px;
+    background: #fff;
+    color: #000;
+
+    &::placeholder {
+      color: #969696;
+    }
+
+    &--date {
+      height: 39px;
+    }
+
+    &--textarea {
+      height: 128px;
+      padding: 8px 10px;
+      resize: vertical;
+    }
+  }
+
+  &__row {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+    line-height: 16px;
+
+    input[type='color'] {
+      width: 50px;
+      height: 28px;
+    }
+  }
+
+  &__row + &__row {
+    margin-top: 1px;
+  }
+
+  &__row-label {
+    margin-right: 40px;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-right: 7px;
+    cursor: pointer;
+
+    input {
+      margin: 0;
+    }
+  }
+
+  &__palette {
+    width: 16px;
+    height: 16px;
+    margin: 1px 6px 0 0;
+    border-radius: 50%;
+    background: conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  }
+
+  &__submit {
+    grid-column: 1 / -1;
+    height: 63px;
+    margin-top: 30px;
+    font: 600 32px/1 $font-title;
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    padding: 24px 16px;
+  }
+}
+
+.teacher-info {
+  position: relative;
+  display: flow-root;
+  padding: 20px 20px 19px 19px;
+
+  &__photo {
+    float: left;
+    width: 320px;
+    height: 320px;
+    margin-right: 40px;
+    object-fit: cover;
+  }
+
+  &__star {
+    position: absolute;
+    top: 32px;
+    right: 18px;
+    width: 43px;
+    height: 42px;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+
+    @include star($c-star-soft);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 13px 12px 11px;
+
+      @include star(#fff);
+    }
+
+    &:hover::after {
+      background: $c-star;
+    }
+  }
+
+  &__name {
+    margin-top: 3px;
+    padding-right: 60px;
+    font: 400 39px/1.2 $font-text;
+  }
+
+  &__subject {
+    margin-top: 34px;
+    padding-bottom: 4px;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  &__line {
+    margin-top: 16px;
+  }
+
+  &__email {
+    color: $c-link;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__about {
+    clear: both;
+    padding-top: 33px;
+  }
+
+  &__map {
+    display: inline-block;
+    margin-top: 19px;
+    border-bottom: 1px dashed currentcolor;
+    color: $c-link-soft;
+  }
+
+  @include mobile {
+    &__photo {
+      float: none;
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      margin: 0 auto 20px;
+    }
+
+    &__about {
+      padding-top: 24px;
+    }
+  }
+}
