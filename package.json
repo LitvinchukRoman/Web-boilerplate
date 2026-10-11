@@ -4,6 +4,7 @@
   "main": "./src/index.js",
   "scripts": {
     "start": "node express.js",
+    "lab2": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/js/app.js",
     "scss": "sass --watch --no-source-map src/scss/style.scss:src/css/style.css",
     "build": "rm -f build && cross-env NODE_ENV=production webpack --progress",
     "lint": "eslint src/js",
