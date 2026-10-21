@@ -48,8 +48,8 @@
       width: 77px;
     }
 
-    &--region {
-      width: 92px;
+    &--country {
+      width: 140px;
     }
 
     &--sex {
@@ -80,6 +80,12 @@
   grid-template-columns: repeat(5, 1fr);
   row-gap: 39px;
   margin-top: 60px;
+
+  &__empty {
+    grid-column: 1 / -1;
+    color: $c-muted;
+    text-align: center;
+  }
 
   @include mobile {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

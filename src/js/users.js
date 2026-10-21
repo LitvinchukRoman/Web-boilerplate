@@ -119,12 +119,16 @@ export const sortUsers = (users, key, order = 'asc') => {
   return [...users].sort((a, b) => direction * compare(a[key], b[key]));
 };
 
-export const findUser = (users, query) => {
-  if (typeof query === 'number') return users.find(({ age }) => age === query);
+const matchesQuery = (query) => {
+  if (typeof query === 'number') return ({ age }) => age === query;
   const text = query.toLowerCase();
-  return users.find(({ full_name: name, note }) => [name, note]
-    .some((value) => value?.toLowerCase().includes(text)));
+  return ({ full_name: name, note }) => [name, note]
+    .some((value) => value?.toLowerCase().includes(text));
 };
+
+export const findUser = (users, query) => users.find(matchesQuery(query));
+
+export const searchUsers = (users, query) => users.filter(matchesQuery(query));
 
 export const percentOf = (users, predicate) => {
   if (!users.length) return 0;

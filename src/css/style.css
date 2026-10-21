@@ -363,8 +363,8 @@ textarea {
 .filters__select--age {
   width: 77px;
 }
-.filters__select--region {
-  width: 92px;
+.filters__select--country {
+  width: 140px;
 }
 .filters__select--sex {
   width: 87px;
@@ -391,6 +391,11 @@ textarea {
   grid-template-columns: repeat(5, 1fr);
   row-gap: 39px;
   margin-top: 60px;
+}
+.cards__empty {
+  grid-column: 1/-1;
+  color: #989898;
+  text-align: center;
 }
 @media (max-width: 767px) {
   .cards {
@@ -491,15 +496,18 @@ textarea {
   padding-left: 32px;
   text-align: left;
 }
-.stats th:hover {
+.stats th:hover, .stats th[aria-sort] {
   background: #fafafa;
   box-shadow: inset 0 -4px 0 #222;
 }
-.stats th:hover::after {
+.stats th:hover::after, .stats th[aria-sort]::after {
   content: "↓";
   position: absolute;
   margin-left: 15px;
   color: #5aa3bf;
+}
+.stats th[aria-sort=ascending]::after {
+  content: "↑";
 }
 .stats td {
   height: 36px;
@@ -568,13 +576,15 @@ textarea {
 }
 
 .cards--carousel {
+  grid-template-columns: none;
+  grid-auto-columns: 20%;
+  grid-auto-flow: column;
   margin-top: 34px;
+  overflow-x: hidden;
 }
 @media (max-width: 767px) {
   .cards--carousel {
-    grid-template-columns: none;
     grid-auto-columns: 160px;
-    grid-auto-flow: column;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
   }
@@ -778,7 +788,7 @@ textarea {
   background: #fff;
   clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
 }
-.teacher-info__star:hover::after {
+.teacher-info__star:hover::after, .teacher-info__star--active::after {
   background: #ecec02;
 }
 .teacher-info__name {

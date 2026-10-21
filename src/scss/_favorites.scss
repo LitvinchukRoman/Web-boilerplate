@@ -39,12 +39,14 @@
 }
 
 .cards--carousel {
+  grid-template-columns: none;
+  grid-auto-columns: 20%;
+  grid-auto-flow: column;
   margin-top: 34px;
+  overflow-x: hidden;
 
   @include mobile {
-    grid-template-columns: none;
     grid-auto-columns: 160px;
-    grid-auto-flow: column;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
 

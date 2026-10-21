@@ -12,5 +12,6 @@ module.exports = {
   },
   rules: {
     'import/extensions': ['error', 'always', { ignorePackages: true }],
+    'import/prefer-default-export': 'off',
   },
 };

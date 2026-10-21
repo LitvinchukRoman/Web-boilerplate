@@ -218,7 +218,8 @@
       @include star(#fff);
     }
 
-    &:hover::after {
+    &:hover::after,
+    &--active::after {
       background: $c-star;
     }
   }
