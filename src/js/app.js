@@ -1,8 +1,7 @@
-import { randomUserMock, additionalUsers } from './data/mock.js';
-import { COURSES } from './constants.js';
+import { COURSES, INITIAL_TEACHERS, LOAD_MORE_COUNT } from './constants.js';
+import { fetchTeachers, saveTeacher } from './api.js';
 import {
   filterUsers,
-  formatUsers,
   searchUsers,
   sortUsers,
 } from './users.js';
@@ -14,7 +13,10 @@ import { readFilters } from './ui/filters.js';
 import { initAddForm } from './ui/add-form.js';
 
 const state = {
-  teachers: formatUsers(randomUserMock, additionalUsers),
+  teachers: [],
+  loaded: 0,
+  seed: undefined,
+  loading: false,
   query: '',
   sort: { key: 'full_name', order: 'asc' },
   page: 1,
@@ -25,8 +27,15 @@ const searchForm = document.querySelector('.search');
 const teacherCards = document.querySelector('#teacher-cards');
 const favoriteCards = document.querySelector('#favorite-cards');
 const addForm = document.querySelector('#add-teacher-form');
+const loadMore = document.querySelector('#load-more');
+const statusLine = document.querySelector('#load-status');
 
 const findTeacher = (id) => state.teachers.find((teacher) => teacher.id === id);
+
+const showStatus = (message = '') => {
+  statusLine.textContent = message;
+  statusLine.hidden = !message;
+};
 
 const countries = () => [...new Set(['Ukraine', ...state.teachers.map(({ country }) => country)])]
   .filter(Boolean)
@@ -39,14 +48,54 @@ const visibleTeachers = () => {
 };
 
 const render = () => {
+  const teachers = visibleTeachers();
+
   renderOptions(filtersForm.elements.country, countries(), 'All');
   renderOptions(addForm.elements.country, countries());
-  renderCards(teacherCards, visibleTeachers());
+  renderCards(teacherCards, teachers, {
+    emptyText: state.loading && !state.teachers.length ? 'Loading teachers...' : 'No teachers found',
+  });
   renderCards(favoriteCards, state.teachers.filter(({ favorite }) => favorite), {
     withSubject: false,
     emptyText: 'No favorites yet',
   });
-  renderStatistics(sortUsers(state.teachers, state.sort.key, state.sort.order), state);
+  renderStatistics(sortUsers(teachers, state.sort.key, state.sort.order), state);
+
+  loadMore.disabled = state.loading;
+  loadMore.textContent = state.loading ? 'Loading...' : 'Show more';
+};
+
+const loadTeachers = async () => {
+  if (state.loading) return;
+
+  const count = state.loaded ? LOAD_MORE_COUNT : INITIAL_TEACHERS;
+  state.loading = true;
+  showStatus();
+  render();
+
+  try {
+    const { teachers, skipped, seed } = await fetchTeachers({
+      count,
+      page: Math.floor(state.loaded / count) + 1,
+      seed: state.seed,
+    });
+    const known = new Set(state.teachers.map(({ id }) => id));
+
+    state.seed = seed;
+    state.loaded += count;
+    state.teachers.push(...teachers.filter(({ id }) => !known.has(id)));
+    if (skipped) showStatus(`${skipped} invalid ${skipped === 1 ? 'user was' : 'users were'} skipped`);
+  } catch (error) {
+    showStatus('Could not load teachers. Check your connection and try again.');
+  } finally {
+    state.loading = false;
+    render();
+  }
+};
+
+const resetPage = () => {
+  state.page = 1;
+  render();
 };
 
 document.addEventListener('click', (event) => {
@@ -62,20 +111,20 @@ document.querySelector('.teacher-info__star').addEventListener('click', () => {
   render();
 });
 
-filtersForm.addEventListener('change', render);
+filtersForm.addEventListener('change', resetPage);
 
 searchForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const value = searchForm.elements.q.value.trim();
   state.query = /^\d+$/.test(value) ? Number(value) : value;
-  render();
+  resetPage();
   document.querySelector('#teachers').scrollIntoView();
 });
 
 searchForm.elements.q.addEventListener('input', ({ target }) => {
   if (target.value || !state.query) return;
   state.query = '';
-  render();
+  resetPage();
 });
 
 document.querySelector('.stats thead').addEventListener('click', (event) => {
@@ -84,8 +133,7 @@ document.querySelector('.stats thead').addEventListener('click', (event) => {
   const { sort } = header.dataset;
   const order = state.sort.key === sort && state.sort.order === 'asc' ? 'desc' : 'asc';
   state.sort = { key: sort, order };
-  state.page = 1;
-  render();
+  resetPage();
 });
 
 document.querySelector('#stats-pagination').addEventListener('click', (event) => {
@@ -103,11 +151,20 @@ document.querySelectorAll('.carousel__arrow').forEach((arrow) => {
   });
 });
 
+loadMore.addEventListener('click', loadTeachers);
+
 renderOptions(addForm.elements.speciality, COURSES);
-initAddForm(addForm, (teacher) => {
-  state.teachers.push(teacher);
-  render();
+initAddForm(addForm, async (teacher) => {
+  try {
+    await saveTeacher(teacher);
+    showStatus();
+  } catch (error) {
+    showStatus('Teacher added locally: json-server is not running (npm run server).');
+  }
+  state.teachers.unshift(teacher);
+  resetPage();
   window.location.hash = 'close';
 });
 
 render();
+loadTeachers();

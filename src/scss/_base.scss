@@ -101,6 +101,13 @@ textarea {
     color: #fff;
   }
 
+  &:disabled {
+    background: transparent;
+    color: $c-accent;
+    cursor: default;
+    opacity: 0.5;
+  }
+
   &--search {
     width: 94px;
     height: 42px;

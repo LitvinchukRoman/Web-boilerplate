@@ -48,7 +48,11 @@ const fromAdditionalUser = ({ b_day: birthday, ...user }) => ({
   b_date: user.b_date ?? birthday,
 });
 
-const mergeDuplicates = (users) => users.reduce((result, user) => {
+const uniqueById = (users) => users.filter(
+  ({ id }, index) => users.findIndex((user) => user.id === id) === index,
+);
+
+const mergeInto = (base, users) => users.reduce((result, user) => {
   const duplicate = result.find(({ id, full_name: name }) => (
     id === user.id || name === user.full_name
   ));
@@ -58,7 +62,7 @@ const mergeDuplicates = (users) => users.reduce((result, user) => {
     result.push({ ...user });
   }
   return result;
-}, []);
+}, base);
 
 const findCourse = (course) => COURSES.find((item) => item.toLowerCase() === course?.toLowerCase());
 
@@ -72,10 +76,10 @@ const normalize = (user) => ({
   note: user.note ?? '',
 });
 
-export const formatUsers = (randomUsers, additionalUsers = []) => mergeDuplicates([
-  ...randomUsers.map(fromRandomUser),
-  ...additionalUsers.map(fromAdditionalUser),
-]).map(normalize);
+export const formatUsers = (randomUsers, additionalUsers = []) => mergeInto(
+  uniqueById(randomUsers.map(fromRandomUser)),
+  additionalUsers.map(fromAdditionalUser),
+).map(normalize);
 
 const isCapitalized = (value) => typeof value === 'string' && /^(?!\p{Ll})\p{L}/u.test(value);
 

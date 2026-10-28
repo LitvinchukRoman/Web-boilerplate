@@ -211,6 +211,12 @@ textarea {
   background: #f75c49;
   color: #fff;
 }
+.btn:disabled {
+  background: transparent;
+  color: #f75c49;
+  cursor: default;
+  opacity: 0.5;
+}
 .btn--search {
   width: 94px;
   height: 42px;
@@ -458,6 +464,17 @@ textarea {
   font-size: 12px;
 }
 
+.teachers__more {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+.teachers__status {
+  margin-top: 16px;
+  color: #989898;
+  text-align: center;
+}
+
 .table-wrap {
   margin-top: 34px;
 }
@@ -542,6 +559,12 @@ textarea {
 }
 .pagination__item--current, .pagination__item--dots, .pagination__item--current:hover, .pagination__item--dots:hover {
   color: #222;
+}
+
+.stats-total {
+  margin-top: 20px;
+  padding-left: 20px;
+  color: #989898;
 }
 
 .carousel {

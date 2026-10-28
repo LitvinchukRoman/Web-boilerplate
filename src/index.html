@@ -73,6 +73,11 @@
                </form>
 
                <ul class="cards" id="teacher-cards"></ul>
+
+               <div class="teachers__more">
+                  <button class="btn btn--large" id="load-more" type="button">Show more</button>
+               </div>
+               <p class="teachers__status" id="load-status" role="status" hidden></p>
             </section>
 
             <section class="section section--statistics" id="statistics">
@@ -99,6 +104,8 @@
                      <tbody id="stats-body"></tbody>
                   </table>
                </div>
+
+               <p class="stats-total" id="stats-total"></p>
 
                <nav class="pagination" id="stats-pagination" aria-label="Statistics pages"></nav>
             </section>

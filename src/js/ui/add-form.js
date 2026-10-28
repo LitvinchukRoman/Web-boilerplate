@@ -39,7 +39,9 @@ export const initAddForm = (form, onAdd) => {
     form.querySelectorAll(`[name="${target.name}"]`).forEach((control) => control.setCustomValidity(''));
   });
 
-  form.addEventListener('submit', (event) => {
+  const submit = form.querySelector('[type="submit"]');
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const teacher = readTeacher(form);
     const errors = validateUser(teacher).errors.filter((field) => field in FIELDS);
@@ -50,7 +52,12 @@ export const initAddForm = (form, onAdd) => {
       return;
     }
 
-    onAdd(teacher);
-    form.reset();
+    submit.disabled = true;
+    try {
+      await onAdd(teacher);
+      form.reset();
+    } finally {
+      submit.disabled = false;
+    }
   });
 };

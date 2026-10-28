@@ -154,3 +154,17 @@
     font-size: 12px;
   }
 }
+
+.teachers {
+  &__more {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  &__status {
+    margin-top: 16px;
+    color: $c-muted;
+    text-align: center;
+  }
+}

@@ -5,6 +5,7 @@ const VISIBLE_PAGES = 3;
 
 const tbody = document.querySelector('#stats-body');
 const pagination = document.querySelector('#stats-pagination');
+const total = document.querySelector('#stats-total');
 const headers = document.querySelectorAll('.stats th[data-sort]');
 
 const row = (teacher) => {
@@ -30,10 +31,12 @@ const pageItems = (page, pages) => {
   return items;
 };
 
-export const renderStatistics = (teachers, { page, sort }) => {
+export const renderStatistics = (teachers, { page: requestedPage, sort }) => {
   const pages = Math.max(1, Math.ceil(teachers.length / PAGE_SIZE));
+  const page = Math.min(requestedPage, pages);
   const start = (page - 1) * PAGE_SIZE;
 
+  total.textContent = `Total: ${teachers.length}`;
   setHtml(tbody, teachers.slice(start, start + PAGE_SIZE).map(row).join(''));
   setHtml(pagination, pages > 1 ? pageItems(page, pages).join('') : '');
 
