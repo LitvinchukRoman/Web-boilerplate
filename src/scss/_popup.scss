@@ -257,8 +257,22 @@
   &__map {
     display: inline-block;
     margin-top: 19px;
+    padding: 0;
+    border: 0;
     border-bottom: 1px dashed currentcolor;
+    background: none;
     color: $c-link-soft;
+    font: inherit;
+    cursor: pointer;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  &__location {
+    height: 300px;
+    margin-top: 20px;
   }
 
   @include mobile {

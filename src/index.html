@@ -13,7 +13,20 @@
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@webdatarocks/webdatarocks@1.4.23/webdatarocks.min.css">
       <link rel="stylesheet" href="./css/style.css">
+
+      <script type="importmap">
+         {
+            "imports": {
+               "lodash-es": "https://cdn.jsdelivr.net/npm/lodash-es@4.18.1/+esm",
+               "dayjs": "https://cdn.jsdelivr.net/npm/dayjs@1.11.23/+esm",
+               "chart.js/auto": "https://cdn.jsdelivr.net/npm/chart.js@4.6.1/auto/+esm",
+               "leaflet": "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/+esm"
+            }
+         }
+      </script>
 
    </head>
 
@@ -83,31 +96,32 @@
             <section class="section section--statistics" id="statistics">
                <h2 class="section__title">Statistics</h2>
 
-               <div class="table-wrap">
-                  <table class="stats">
-                     <colgroup>
-                        <col class="stats__col stats__col--name">
-                        <col class="stats__col stats__col--speciality">
-                        <col class="stats__col stats__col--age">
-                        <col class="stats__col stats__col--gender">
-                        <col>
-                     </colgroup>
-                     <thead>
-                        <tr>
-                           <th data-sort="full_name">Name</th>
-                           <th data-sort="course">Speciality</th>
-                           <th data-sort="age">Age</th>
-                           <th data-sort="gender">Gender</th>
-                           <th data-sort="country">Nationality</th>
-                        </tr>
-                     </thead>
-                     <tbody id="stats-body"></tbody>
-                  </table>
+               <div class="stats-tabs" role="tablist" aria-label="Statistics view">
+                  <button class="stats-tabs__tab" type="button" role="tab" data-view="chart" aria-selected="true">Chart</button>
+                  <button class="stats-tabs__tab" type="button" role="tab" data-view="countries" aria-selected="false">By countries</button>
+                  <button class="stats-tabs__tab" type="button" role="tab" data-view="flat" aria-selected="false">All teachers</button>
+               </div>
+
+               <div class="stats-panel" id="stats-chart-panel">
+                  <label class="filters__item">
+                     Group by
+                     <select class="filters__select" id="stats-group">
+                        <option value="course">Speciality</option>
+                        <option value="age">Age</option>
+                        <option value="gender">Gender</option>
+                        <option value="country">Nationality</option>
+                     </select>
+                  </label>
+                  <div class="stats-chart">
+                     <canvas id="stats-chart" role="img" aria-label="Teachers statistics chart"></canvas>
+                  </div>
+               </div>
+
+               <div class="stats-panel" id="stats-pivot-panel" hidden>
+                  <div id="stats-pivot"></div>
                </div>
 
                <p class="stats-total" id="stats-total"></p>
-
-               <nav class="pagination" id="stats-pagination" aria-label="Statistics pages"></nav>
             </section>
 
             <section class="section section--favorites" id="favorites">
@@ -208,14 +222,17 @@
                <p class="teacher-info__subject">Chemistry</p>
                <p class="teacher-info__line">Kyiv, Ukraine</p>
                <p class="teacher-info__line">35, Male</p>
+               <p class="teacher-info__line teacher-info__birthday"></p>
                <p class="teacher-info__line"><a class="teacher-info__email" href="mailto:ihor_tkachuk@domain.com">ihor_tkachuk@domain.com</a></p>
                <p class="teacher-info__line">+380964993252</p>
                <p class="teacher-info__about">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab autem consectetur culpa cumque, distinctio dolor dolore dolorem doloremque ea explicabo facilis nam nesciunt nisi pariatur perspiciatis porro quis similique temporibus veniam veritatis? A ab ad, aliquam amet consequatur cupiditate debitis deserunt doloribus dolorum earum eius eos minus nostrum odit omnis perferendis...</p>
-               <a class="teacher-info__map" href="#teacher-info">toggle map</a>
+               <button class="teacher-info__map" type="button" aria-expanded="false">toggle map</button>
+               <div class="teacher-info__location" hidden></div>
             </article>
          </div>
       </div>
 
+      <script src="https://cdn.jsdelivr.net/npm/@webdatarocks/webdatarocks@1.4.23/webdatarocks.js"></script>
       <script type="module" src="./js/app.js"></script>
    </body>
 </html>

@@ -1,50 +1,145 @@
-import { escapeHtml, setHtml } from './dom.js';
+import Chart from 'chart.js/auto';
+import {
+  countBy,
+  find,
+  mapValues,
+  orderBy,
+  pick,
+  toPairs,
+} from 'lodash-es';
 
-export const PAGE_SIZE = 10;
-const VISIBLE_PAGES = 3;
+const COLORS = [
+  '#f99589', '#6fb7e9', '#f7c85c', '#7fcf9b', '#b49ae0', '#f39bc6',
+  '#5cc6c0', '#f5a25d', '#9aa9bd', '#d4e06b', '#e07b7b', '#8c9ef0',
+];
 
-const tbody = document.querySelector('#stats-body');
-const pagination = document.querySelector('#stats-pagination');
+const AGE_GROUPS = [
+  { max: 17, label: 'Under 18' },
+  { max: 31, label: '18-31' },
+  { max: 45, label: '32-45' },
+  { max: Infinity, label: '46+' },
+];
+
+const GROUPS = {
+  course: ({ course }) => course,
+  age: ({ age }) => find(AGE_GROUPS, ({ max }) => age <= max)?.label,
+  gender: ({ gender }) => gender,
+  country: ({ country }) => country,
+};
+
+const COLUMNS = {
+  full_name: { type: 'string', caption: 'Name' },
+  course: { type: 'string', caption: 'Speciality' },
+  age: { type: 'number', caption: 'Age' },
+  gender: { type: 'string', caption: 'Gender' },
+  country: { type: 'string', caption: 'Nationality' },
+  city: { type: 'string', caption: 'City' },
+  email: { type: 'string', caption: 'Email' },
+  phone: { type: 'string', caption: 'Phone' },
+};
+
+const hierarchy = (field) => ({ uniqueName: field, caption: COLUMNS[field].caption });
+
+const REPORTS = {
+  countries: {
+    slice: {
+      rows: [hierarchy('country')],
+      columns: [{ uniqueName: '[Measures]' }],
+      measures: [
+        { uniqueName: 'full_name', aggregation: 'count', caption: 'Teachers' },
+        {
+          uniqueName: 'age', aggregation: 'average', caption: 'Average age', format: 'age',
+        },
+      ],
+    },
+    formats: [{ name: 'age', decimalPlaces: 1 }],
+    options: { grid: { type: 'compact', showHeaders: false }, showAggregationLabels: false },
+  },
+  flat: {
+    slice: { rows: Object.keys(COLUMNS).map(hierarchy) },
+    options: {
+      grid: { type: 'flat', showHeaders: false, showGrandTotals: 'off' },
+      showAggregationLabels: false,
+    },
+  },
+};
+
+const tabs = document.querySelectorAll('.stats-tabs__tab');
+const chartPanel = document.querySelector('#stats-chart-panel');
+const pivotPanel = document.querySelector('#stats-pivot-panel');
+const groupSelect = document.querySelector('#stats-group');
 const total = document.querySelector('#stats-total');
-const headers = document.querySelectorAll('.stats th[data-sort]');
 
-const row = (teacher) => {
-  const cells = [teacher.full_name, teacher.course, teacher.age, teacher.gender, teacher.country];
-  return `<tr>${cells.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`;
+const chart = new Chart(document.querySelector('#stats-chart'), {
+  type: 'pie',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: COLORS }] },
+  options: {
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'right' } },
+  },
+});
+
+let view = 'chart';
+let pivot;
+let pivotKey = '';
+let data = { visible: [], all: [] };
+
+const renderChart = (teachers) => {
+  const counts = orderBy(toPairs(countBy(teachers, GROUPS[groupSelect.value])), [1], ['desc']);
+  chart.data.labels = counts.map(([label]) => label);
+  chart.data.datasets[0].data = counts.map(([, count]) => count);
+  chart.update();
 };
 
-const pageLink = (page, label = page) => `<a class="pagination__item" href="#statistics" data-page="${page}">${label}</a>`;
+const pivotReport = (teachers) => ({
+  ...REPORTS[view],
+  dataSource: {
+    data: [
+      mapValues(COLUMNS, ({ type }) => ({ type })),
+      ...teachers.map((teacher) => pick(teacher, Object.keys(COLUMNS))),
+    ],
+  },
+});
 
-const pageItems = (page, pages) => {
-  const first = Math.max(1, Math.min(page - 1, pages - VISIBLE_PAGES + 1));
-  const last = Math.min(pages, first + VISIBLE_PAGES - 1);
-  const items = [];
+const renderPivot = (teachers) => {
+  const key = [view, ...teachers.map(({ id }) => id)].join();
+  if (key === pivotKey) return;
+  pivotKey = key;
 
-  if (first > 1) items.push(pageLink(1, 'First'), '<span class="pagination__item pagination__item--dots">...</span>');
-  for (let item = first; item <= last; item += 1) {
-    items.push(item === page
-      ? `<span class="pagination__item pagination__item--current">${item}</span>`
-      : pageLink(item));
+  const report = pivotReport(teachers);
+  if (pivot) {
+    pivot.setReport(report);
+  } else {
+    pivot = new window.WebDataRocks({
+      container: '#stats-pivot',
+      toolbar: false,
+      width: '100%',
+      height: 480,
+      report,
+    });
   }
-  if (last < pages) items.push('<span class="pagination__item pagination__item--dots">...</span>', pageLink(pages, 'Last'));
-
-  return items;
 };
 
-export const renderStatistics = (teachers, { page: requestedPage, sort }) => {
-  const pages = Math.max(1, Math.ceil(teachers.length / PAGE_SIZE));
-  const page = Math.min(requestedPage, pages);
-  const start = (page - 1) * PAGE_SIZE;
+const update = () => {
+  const teachers = view === 'flat' ? data.all : data.visible;
 
+  tabs.forEach((tab) => tab.setAttribute('aria-selected', tab.dataset.view === view));
+  chartPanel.hidden = view !== 'chart';
+  pivotPanel.hidden = view === 'chart';
   total.textContent = `Total: ${teachers.length}`;
-  setHtml(tbody, teachers.slice(start, start + PAGE_SIZE).map(row).join(''));
-  setHtml(pagination, pages > 1 ? pageItems(page, pages).join('') : '');
 
-  headers.forEach((header) => {
-    if (header.dataset.sort === sort.key) {
-      header.setAttribute('aria-sort', sort.order === 'asc' ? 'ascending' : 'descending');
-    } else {
-      header.removeAttribute('aria-sort');
-    }
-  });
+  if (view === 'chart') renderChart(teachers);
+  else renderPivot(teachers);
+};
+
+tabs.forEach((tab) => tab.addEventListener('click', () => {
+  view = tab.dataset.view;
+  update();
+}));
+
+groupSelect.addEventListener('change', update);
+
+export const renderStatistics = (visible, all) => {
+  data = { visible, all };
+  update();
 };

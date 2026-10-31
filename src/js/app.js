@@ -1,10 +1,6 @@
 import { COURSES, INITIAL_TEACHERS, LOAD_MORE_COUNT } from './constants.js';
 import { fetchTeachers, saveTeacher } from './api.js';
-import {
-  filterUsers,
-  searchUsers,
-  sortUsers,
-} from './users.js';
+import { filterUsers, searchUsers } from './users.js';
 import { renderOptions } from './ui/dom.js';
 import { renderCards } from './ui/cards.js';
 import { getShownTeacherId, showTeacherInfo } from './ui/teacher-info.js';
@@ -18,8 +14,6 @@ const state = {
   seed: undefined,
   loading: false,
   query: '',
-  sort: { key: 'full_name', order: 'asc' },
-  page: 1,
 };
 
 const filtersForm = document.querySelector('.filters');
@@ -59,7 +53,7 @@ const render = () => {
     withSubject: false,
     emptyText: 'No favorites yet',
   });
-  renderStatistics(sortUsers(teachers, state.sort.key, state.sort.order), state);
+  renderStatistics(teachers, state.teachers);
 
   loadMore.disabled = state.loading;
   loadMore.textContent = state.loading ? 'Loading...' : 'Show more';
@@ -93,11 +87,6 @@ const loadTeachers = async () => {
   }
 };
 
-const resetPage = () => {
-  state.page = 1;
-  render();
-};
-
 document.addEventListener('click', (event) => {
   const link = event.target.closest('[data-teacher-id]');
   if (link) showTeacherInfo(findTeacher(link.dataset.teacherId));
@@ -111,35 +100,19 @@ document.querySelector('.teacher-info__star').addEventListener('click', () => {
   render();
 });
 
-filtersForm.addEventListener('change', resetPage);
+filtersForm.addEventListener('change', render);
 
 searchForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const value = searchForm.elements.q.value.trim();
   state.query = /^\d+$/.test(value) ? Number(value) : value;
-  resetPage();
+  render();
   document.querySelector('#teachers').scrollIntoView();
 });
 
 searchForm.elements.q.addEventListener('input', ({ target }) => {
   if (target.value || !state.query) return;
   state.query = '';
-  resetPage();
-});
-
-document.querySelector('.stats thead').addEventListener('click', (event) => {
-  const header = event.target.closest('[data-sort]');
-  if (!header) return;
-  const { sort } = header.dataset;
-  const order = state.sort.key === sort && state.sort.order === 'asc' ? 'desc' : 'asc';
-  state.sort = { key: sort, order };
-  resetPage();
-});
-
-document.querySelector('#stats-pagination').addEventListener('click', (event) => {
-  const link = event.target.closest('[data-page]');
-  if (!link) return;
-  state.page = Number(link.dataset.page);
   render();
 });
 
@@ -162,9 +135,8 @@ initAddForm(addForm, async (teacher) => {
     showStatus('Teacher added locally: json-server is not running (npm run server).');
   }
   state.teachers.unshift(teacher);
-  resetPage();
+  render();
   window.location.hash = 'close';
 });
 
-render();
 loadTeachers();
